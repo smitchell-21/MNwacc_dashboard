@@ -44,13 +44,27 @@
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 20px;
+            text-align: center;
         }
 
         h1 {
             color: yellow;
             font-size: 32px;
             text-shadow: 3px 3px 10px black;
-            margin: 0;
+            margin: 0 0 10px 0;
+        }
+
+        .current-wacc {
+            color: white;
+            font-size: 24px;
+            margin: 10px 0 0 0;
+        }
+
+        .wacc-value {
+            color: yellow;
+            font-size: 36px;
+            font-weight: bold;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
         }
 
         .chart-container {
@@ -71,6 +85,9 @@
     <div class="container">
         <div class="title-container">
             <h1>XYZ WACC QUACKULATOR</h1>
+            <div class="current-wacc">
+                Current WACC: <span class="wacc-value" id="current-wacc">Loading...</span>
+            </div>
         </div>
         <div class="chart-container">
             <div id="wacc-chart"></div>
@@ -94,6 +111,10 @@
             ["3/31/24", 14.8147], ["6/30/24", 14.3514], ["9/30/24", 14.9211],
             ["12/31/24", 13.8734], ["3/4/25", 12.9881]
         ];
+
+        // Set current WACC value
+        const currentWacc = data[data.length - 1][1];
+        document.getElementById('current-wacc').textContent = currentWacc.toFixed(2) + '%';
 
         // Process data
         const dates = data.map(row => new Date(row[0]));
