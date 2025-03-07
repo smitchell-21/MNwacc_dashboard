@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WACC Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        #background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('goose.gif');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.8;
+            z-index: -1;
+        }
+
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .title-container {
+            background: rgba(0,0,0,0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: yellow;
+            font-size: 32px;
+            text-shadow: 3px 3px 10px black;
+            margin: 0;
+        }
+
+        .chart-container {
+            width: 90%;
+            background: rgba(0,0,0,0.5);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        #wacc-chart {
+            width: 100%;
+            height: 70vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="background"></div>
+    <div class="container">
+        <div class="title-container">
+            <h1>WACC Dashboard</h1>
+        </div>
+        <div class="chart-container">
+            <div id="wacc-chart"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data
+        const data = [
+            ["12/31/15", 6.1403], ["3/31/16", 12.162], ["6/30/16", 11.0909],
+            ["9/30/16", 11.45], ["12/31/16", 9.8059], ["3/31/17", 10.3306],
+            ["6/30/17", 11.0793], ["9/30/17", 11.4353], ["12/31/17", 11.0004],
+            ["3/31/18", 12.2839], ["6/30/18", 13.5906], ["9/30/18", 12.5345],
+            ["12/31/18", 16.5534], ["3/31/19", 14.6615], ["6/30/19", 14.064],
+            ["9/30/19", 13.4716], ["12/31/19", 12.3025], ["3/31/20", 14.7086],
+            ["6/30/20", 13.9079], ["9/30/20", 14.1174], ["12/31/20", 13.7566],
+            ["3/31/21", 14.9758], ["6/30/21", 16.1742], ["9/30/21", 17.0009],
+            ["12/31/21", 15.5105], ["3/31/22", 15.7077], ["6/30/22", 16.4159],
+            ["9/30/22", 14.129], ["12/31/22", 12.7491], ["3/31/23", 13.9667],
+            ["6/30/23", 15.7544], ["9/30/23", 15.2208], ["12/31/23", 17.6384],
+            ["3/31/24", 14.8147], ["6/30/24", 14.3514], ["9/30/24", 14.9211],
+            ["12/31/24", 13.8734], ["3/4/25", 12.9881]
+        ];
+
+        // Process data
+        const dates = data.map(row => new Date(row[0]));
+        const values = data.map(row => row[1]);
+
+        // Create the trace for the line
+        const trace1 = {
+            x: dates,
+            y: values,
+            mode: 'lines+markers',
+            name: 'WACC',
+            line: {
+                color: 'white',
+                width: 3,
+                shape: 'spline'
+            },
+            marker: {
+                size: 8,
+                color: 'white'
+            }
+        };
+
+        // Create the trace for the last point
+        const lastPoint = {
+            x: [dates[dates.length - 1]],
+            y: [values[values.length - 1]],
+            mode: 'markers+text',
+            marker: {
+                size: 18,
+                color: 'yellow',
+                line: {
+                    color: 'red',
+                    width: 3
+                }
+            },
+            text: [values[values.length - 1].toFixed(2) + '%'],
+            textposition: 'bottom center',
+            textfont: {
+                size: 20,
+                color: 'yellow'
+            },
+            showlegend: false
+        };
+
+        // Layout configuration
+        const layout = {
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0.2)',
+            font: {
+                size: 14,
+                color: 'white'
+            },
+            margin: {
+                l: 50,
+                r: 50,
+                t: 50,
+                b: 50
+            },
+            xaxis: {
+                title: 'Date',
+                gridcolor: 'rgba(255,255,255,0.1)',
+                tickcolor: 'white',
+                tickfont: { color: 'white' },
+                showgrid: true
+            },
+            yaxis: {
+                title: 'WACC (%)',
+                gridcolor: 'rgba(255,255,255,0.1)',
+                tickcolor: 'white',
+                tickfont: { color: 'white' },
+                showgrid: true
+            },
+            template: 'plotly_dark'
+        };
+
+        // Create the plot
+        Plotly.newPlot('wacc-chart', [trace1, lastPoint], layout, {displayModeBar: false});
+
+        // Animation function
+        let currentIndex = 0;
+        const animationSpeed = 150;
+
+        function animate() {
+            if (currentIndex >= data.length) {
+                return;
+            }
+
+            const currentDates = dates.slice(0, currentIndex + 1);
+            const currentValues = values.slice(0, currentIndex + 1);
+
+            const updateTrace1 = {
+                x: [currentDates],
+                y: [currentValues]
+            };
+
+            const updateLastPoint = {
+                x: [[currentDates[currentDates.length - 1]]],
+                y: [[currentValues[currentValues.length - 1]]],
+                text: [[currentValues[currentValues.length - 1].toFixed(2) + '%']]
+            };
+
+            Plotly.update('wacc-chart', updateTrace1, {}, [0]);
+            Plotly.update('wacc-chart', updateLastPoint, {}, [1]);
+
+            currentIndex++;
+            setTimeout(animate, animationSpeed);
+        }
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>
